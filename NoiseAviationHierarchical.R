@@ -8,11 +8,6 @@ library(data.table)
 library(stringr)
 library(lubridate)
 library(ggplot2)
-# install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
-# library(cmdstanr)
-# check_cmdstan_toolchain()
-
-install.packages("MCMCglmm")
 library(MCMCglmm)
 library(coda)
 library(dplyr)
@@ -20,6 +15,9 @@ library(purrr)
 library(tibble)
 library(lme4)
 
+########################################################
+########################################################
+########################################################
 #########
 # FUNCTION 1 — Parse TAF (INCLUDING TEMPO/INTER)
 expand_taf <- function(file) {
@@ -2085,14 +2083,14 @@ build_composite_noise_index <- function(noise_data, temp_data) {
   out[order(-CompositeNoiseIndex)]
 }
 
-
+########################################################
+########################################################
+########################################################
 #######################################
 # Load data
 ### READ TAF DATA
 ### AVS1 temp and wind
-setwd(
-  "C:/Users/jwest.INTERNAL/OneDrive - Bureau of Meteorology/Documents/Data/Aviation/AVS1"
-)
+
 taf_files <- list.files(pattern = "TAF")
 metar_files <- list.files(pattern = "METAR")
 taf_files <- sort(taf_files)
@@ -2125,53 +2123,6 @@ temp_data <- merge(temp_data, forecaster_lookup, by = "forecaster", all.x =
                      TRUE)
 saveRDS(noise_data, file = "noise_data.rds")
 saveRDS(temp_data, file = "temp_data.rds")
-getwd()
-##################################################
-# 1. Prepare the modelling identifiers
-# model_data <- copy(noise_data)
-#
-# model_data <- model_data[!is.na(ForecasterID) &
-#                            ForecasterID != "UNKNOWN" &
-#                            !is.na(aerodrome) &
-#                            !is.na(Issued) &
-#                            !is.na(validTime)]
-#
-# model_data[, `:=`(
-#   lead_hours = as.numeric(difftime(validTime, Issued, units = "hours")),
-#
-#   taf_id = interaction(aerodrome, format(Issued, "%Y%m%d%H%M%S"), drop = TRUE),
-#
-#   verify_case_id = interaction(aerodrome, format(validTime, "%Y%m%d%H"), drop = TRUE),
-#
-#   issue_cycle = factor(floor(hour(Issued) / 3) * 3),
-#
-#   valid_hour = factor(hour(validTime)),
-#   month = factor(month(validTime)),
-#
-#   ForecasterID = factor(ForecasterID),
-#   aerodrome = factor(aerodrome),
-#   # taf_id = factor(taf_id),
-#   # verify_case_id = factor(verify_case_id),
-#   forecast_type = factor(forecast_type),
-#   is_amd = factor(is_amd)
-# )]
-#
-# model_data <- model_data[lead_hours >= 0 &
-#                            lead_hours <= 30]
-#
-# model_data[, lead_z :=
-#              as.numeric(scale(lead_hours))]
-#
-# setorder(model_data, aerodrome, validTime, Issued)
-#
-# model_data[, `:=`(
-#   forecast_sequence = seq_len(.N),
-#   n_forecasts_for_case = .N,
-#   is_latest_forecast = seq_len(.N) == .N
-# ), by = verify_case_id]
-#
-# model_data[, sequence_z :=
-#              as.numeric(scale(forecast_sequence))]
 
 ##################################################
 ##### FORECAST VINTAGE STRUCTURE
@@ -2235,7 +2186,7 @@ taf_amendment_summary <- unique(noise_data[, .(aerodrome, Issued, ForecasterID, 
 taf_amendment_summary
 
 
-# 3. Build a long-format performance dataset
+# Build a long-format performance dataset
 performance_data <- rbindlist(
   list(
     analysis_data[!is.na(wind_spd_error), .(
@@ -2389,7 +2340,7 @@ performance_data <- rbindlist(list(performance_data[, ..common_columns], temp_pe
 
 performance_data[, element := factor(element)]
 
-# 4. Descriptive check:
+# Descriptive check:
 # does accuracy improve as lead time contracts?
 performance_data[, lead_bin := cut(
   lead_hours,
@@ -2469,7 +2420,7 @@ install.packages("blme")
 library(blme)
 library(lme4)
 
-# 3. Create a manageable difficulty block
+# Create a manageable difficulty block
 fast_data <- copy(hier_data)
 
 fast_data[, valid_date := as.Date(validTime)]
@@ -2508,7 +2459,7 @@ fast_data[, .(
   accuracy = mean(accurate)
 ), by = element]
 
-# 4. Fit the fast hierarchical model
+# Fit the fast hierarchical model
 # The priors are explicit:
 # fixed effects: normal prior centred on zero;
 # random-effect standard deviations: Wishart-type regularising prior;
