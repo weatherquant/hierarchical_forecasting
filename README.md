@@ -20,3 +20,5 @@ Later forecast updates reduced both misses, and false alarms for fog but had mix
 These findings show that forecast performance depends on the weather situation, the forecast task and whether the concern is a missed event or a false alarm.
 
 Operational review should therefore focus on difficult cases, specific elements and hazards, and the trade-off between misses and false alarms rather than on raw accuracy or individual rankings.
+
+## Note: The files attached here represent only a small sample of the database.
